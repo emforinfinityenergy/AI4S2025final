@@ -25,7 +25,9 @@ class Net(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(8, 64),
             nn.Tanh(),
-            nn.Linear(64, 64),
+            nn.Linear(64, 128),
+            nn.Tanh(),
+            nn.Linear(128, 64),
             nn.Tanh(),
             nn.Linear(64, 16),
             nn.Tanh(),
@@ -55,9 +57,9 @@ dna_t = torch.tensor(dna, dtype=torch.float32)
 e_scores_t = torch.tensor(e_scores, dtype=torch.float32)
 
 dataset = MyDataset(dna_t, e_scores_t)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=48, shuffle=True)
 
-NUM_EPOCHS = 450
+NUM_EPOCHS = 500
 net = Net()
 criterion = nn.MSELoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
