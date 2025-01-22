@@ -57,12 +57,12 @@ dna_t = torch.tensor(dna, dtype=torch.float32)
 e_scores_t = torch.tensor(e_scores, dtype=torch.float32)
 
 dataset = MyDataset(dna_t, e_scores_t)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=48, shuffle=True)
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=512, shuffle=True)
 
-NUM_EPOCHS = 500
+NUM_EPOCHS = 4000
 net = Net()
 criterion = nn.MSELoss()
-optimizer = optim.Adam(net.parameters(), lr=0.001)
+optimizer = optim.Adam(net.parameters(), lr=0.002)
 
 for epoch in range(NUM_EPOCHS):
     for dna_seg, e_score_seg in dataloader:
@@ -71,11 +71,11 @@ for epoch in range(NUM_EPOCHS):
         loss = criterion(pred.T[0], e_score_seg)
         loss.backward()
         optimizer.step()
-    if epoch % 10 == 0:
+    if epoch % 1000 == 0:
         with torch.no_grad():
             pred = net(dna_t)
             loss = criterion(pred.T[0], e_scores_t)
-            print(f"Epoch {epoch}, loss = {loss}")
+            print(f"Epoch {epoch}, loss = {loss}, Time Elapsed: {time.time() - t1}")
 
 
 # GGGTATCA
