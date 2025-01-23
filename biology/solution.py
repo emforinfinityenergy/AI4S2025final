@@ -23,9 +23,11 @@ class Net(nn.Module):
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(8, 64),
+            nn.Linear(32, 128),
             nn.Tanh(),
-            nn.Linear(64, 128),
+            nn.Linear(128, 256),
+            nn.Tanh(),
+            nn.Linear(256, 128),
             nn.Tanh(),
             nn.Linear(128, 64),
             nn.Tanh(),
@@ -50,19 +52,24 @@ for i in range(df.shape[0]):
     idx_l = ['', 'A', 'C', 'G', 'T']
     seg_l = []
     for n in seg:
-        seg_l.append(idx_l.index(n))
+        for j in range(4):
+            seg_l.append(0)
+        seg_l[-1 * idx_l.index(n)] = 1
     dna.append(seg_l)
+
+
+print(dna)
 
 dna_t = torch.tensor(dna, dtype=torch.float32)
 e_scores_t = torch.tensor(e_scores, dtype=torch.float32)
 
 dataset = MyDataset(dna_t, e_scores_t)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=512, shuffle=True)
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=1024, shuffle=True)
 
-NUM_EPOCHS = 4000
+NUM_EPOCHS = 5000
 net = Net()
 criterion = nn.MSELoss()
-optimizer = optim.Adam(net.parameters(), lr=0.002)
+optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 for epoch in range(NUM_EPOCHS):
     for dna_seg, e_score_seg in dataloader:
@@ -71,7 +78,7 @@ for epoch in range(NUM_EPOCHS):
         loss = criterion(pred.T[0], e_score_seg)
         loss.backward()
         optimizer.step()
-    if epoch % 1000 == 0:
+    if epoch % 10 == 0:
         with torch.no_grad():
             pred = net(dna_t)
             loss = criterion(pred.T[0], e_scores_t)
